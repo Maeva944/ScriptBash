@@ -8,19 +8,40 @@
 #gestion des permission avec acl
 
 Add_user(){
-    ..
+    echo "Vous allez crée un utilisateur :"
+    read -p "Quel est le nom de l'utilisateur ?:" name_user
+    read -p "Dans quel groupe appartiendra t'il?:" group_user
+    if [[ -n $name_user ]]; then
+        sudo useradd -m $name_user
+        if [[ -n $group_user && -n $name_user ]]; then
+            sudo useradd -g $group_user -m $name_user
+        fi
+    else 
+        echo "Le champs est vide"
+    fi
 }
 
 delete_user(){
-    ..
+    echo "Vous allez supprimer un utilisateur :"
+    read -p "Quel est le nom de l'utilisateur ?:" name_user
+    if [[ -n $name_user ]]; then
+        sudo userdel -r -f  $name_user
+    else 
+        echo "Le champs est vide"
+    fi
 }
 
 update_user(){
-    ..
+    echo "Que vous voulez vous modifier ?"
+    echo "1. Le nom de l'utilisateur ?"
+    echo "2. Le groupe de l'utilisateur ?"
+    echo "3. Le répertoire ?"
+    echo "4. Le mot de passe ?"
 }
 
 see_user(){
-    ..
+    echo "Voici la liste de tous les utilisateur :"
+    cat /etc/passwd
 }
 
 add_group(){
@@ -149,6 +170,7 @@ while true; do
     echo "2. Gestion des groupes"
     echo "3. Attribuer des permissions"
     echo "4. Voir les utilisateur inactif"
+    echo "5. Sortis"
     read -p "Choisissez une options :" user_input
     clear
 
@@ -160,10 +182,13 @@ while true; do
         2)menu_group
         ;;
 
-        3)fontiocn
+        3)fonction
         ;;
 
-        4)fontiocn
+        4)fonction
+        ;;
+
+        5)break
         ;;
 
         *)echo "Choix invalide"
