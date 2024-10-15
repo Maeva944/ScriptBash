@@ -31,12 +31,49 @@ delete_user(){
     fi
 }
 
+update_name(){
+    echo "Vous allez changer le nom d'un user"
+    read -p "Le nom actuelle de l'utilisateur" past_name
+    read -p "Nouveau nom de l'utilisateur" new_name
+    if [[ -n $past_name && -n $new_name ]]; then 
+        sudo usermod -l $new_name $past_name
+    else 
+        echo "Le champs est vide"
+    fi
+}
+
+update_group(){
+    ..
+}
+
 update_user(){
+    clear
     echo "Que vous voulez vous modifier ?"
     echo "1. Le nom de l'utilisateur ?"
     echo "2. Le groupe de l'utilisateur ?"
     echo "3. Le répertoire ?"
     echo "4. Le mot de passe ?"
+    read -p "Choisissez une option" user_input
+    clear
+    while true; do
+        case $user_input in
+
+            1)update_name
+            ;;
+
+            2)fonction
+            ;;
+
+            3)fonction
+            ;;
+
+            4)fonction
+            ;;
+
+            *)echo "Choix invalide"
+            ;;
+        esac
+    done
 }
 
 see_user(){
