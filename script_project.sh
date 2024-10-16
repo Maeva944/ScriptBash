@@ -128,15 +128,42 @@ see_user(){
 }
 
 add_group(){
-    ..
+    read -p "Quel est le nom de ce nouveau groupe ?:" groupe_name
+    if [[ -n $groupe_name ]]; then 
+        echo "Le groupe $groupe_name à été ajouté"
+        sudo groupadd $groupe_name
+    else 
+        echo "Le champs est vide"
+    fi
 }
 
 remove_user_from_group(){
-    ..
+    echo "Vous allez retirer un user d'un groupe"
+    read -p "Quel est le nom de l'user ?: " user_name
+    read -p "Quel est le nom du groupe ?: " group_name
+    if [[ -n $user_name && -n $group_name ]]; then 
+        sudo deluser $user_name $group_name
+    else 
+        echo "Le champs est vide"
+    fi
 }
 
-delete_empty_group(){
-    ..
+delete_empty_group() {
+    read -p "Quel est le nom du groupe à supprimer ?:" group_name
+    members=$(getent group "$group_name" | cut -d: -f4)
+
+    if [ -z "$members" ]; then
+        sudo groupdel "$group_name"
+        echo "Le groupe $group_name a été supprimé."
+    else
+        echo "Le groupe n'est pas vide, il ne peut donc pas être supprimé."
+    fi
+}
+
+
+see_group(){
+    echo "Voici la liste de tous les groupes :"
+    getent group
 }
 
 set_acl(){
@@ -187,7 +214,8 @@ menu_group(){
         echo "1. Crée un groupe"
         echo "2. retirer un utilisateur d'un groupe"
         echo "3. suprimer un groupe vide"
-        echo "4. retour"
+        echo "4. Voir tous les groupes"
+        echo "5. retour"
         read -p "Choisissez une option:" choice_menu_group
         clear
         
@@ -202,7 +230,10 @@ menu_group(){
         3)delete_empty_group
         ;;
 
-        4)break
+        4)see_group
+        ;;
+
+        5)break
         ;;
 
         *)echo "Choix invalide"
