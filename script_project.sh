@@ -13,9 +13,9 @@ Add_user(){
     read -p "Dans quel groupe appartiendra t'il?:" group_user
     if [[ -n $name_user ]]; then
         sudo useradd -m $name_user
-        if [[ -n $group_user && -n $name_user ]]; then
-            sudo useradd -g $group_user -m $name_user
-        fi
+    if [[ -n $group_user && -n $name_user ]]; then
+        sudo useradd -g $group_user -m $name_user
+    fi
     else 
         echo "Le champs est vide"
     fi
@@ -42,32 +42,78 @@ update_name(){
     fi
 }
 
+
 update_group(){
-    ..
+    read -p "Quel est le nom de l'user ?: " name_user
+    read -p "Quel est le nom du groupe ?: " group_user 
+    if [[ -n name_user && -n $group_user ]]; then 
+        sudo usermod -g $group_user $name_user
+    else 
+        echo "Le champs est vide"
+    fi 
+}
+
+secondary_group(){
+    read -p "Quel est le nom de l'user ?: " name_user
+    read -p "Quel est le nom du groupe ?: " group_user 
+    if [[ -n name_user && -n $group_user ]]; then 
+        sudo usermod -aG $group_user $name_user
+    else 
+        echo "Le champs est vide"
+    fi 
+}
+
+menu_update_group(){
+    while true; do
+    echo "Que vous voulez vous ?: "
+    echo "1. Changer le groupe principal"
+    echo "2. Ajouter ou changer un groupe supplémentaire"
+    echo "3. Retour"
+    read -p "Choisissez une option :" user_input2
+    clear
+        case $user_input2 in 
+
+            1)update_group 
+            ;;
+
+            2)secondary_group 
+            ;;
+
+            3)break
+            ;;
+
+            *)echo "Choix invalide"
+            ;;
+            esac
+    done
 }
 
 update_user(){
+    while true; do
     clear
     echo "Que vous voulez vous modifier ?"
     echo "1. Le nom de l'utilisateur ?"
     echo "2. Le groupe de l'utilisateur ?"
     echo "3. Le répertoire ?"
     echo "4. Le mot de passe ?"
-    read -p "Choisissez une option" user_input
+    echo "5. Retour"
+    read -p "Choisissez une option" user_input3
     clear
-    while true; do
-        case $user_input in
+        case $user_input3 in
 
             1)update_name
             ;;
 
-            2)fonction
+            2)menu_update_group
             ;;
 
-            3)fonction
+            3)..
             ;;
 
             4)fonction
+            ;;
+
+            5)break
             ;;
 
             *)echo "Choix invalide"
@@ -203,6 +249,7 @@ menu_user(){
 
 
 while true; do
+    echo "Bonjour"
     echo "1. Ajouter, modifier ou supprimer un utilisateur"
     echo "2. Gestion des groupes"
     echo "3. Attribuer des permissions"
