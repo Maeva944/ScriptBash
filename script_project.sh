@@ -21,13 +21,36 @@ Add_user(){
     fi
 }
 
-delete_user(){
+#delete_user(){
+#    echo "Vous allez supprimer un utilisateur :"
+#    read -p "Quel est le nom de l'utilisateur ?:" name_user
+#    if [[ -n $name_user ]]; then
+#        sudo userdel -r -f  $name_user
+#    else 
+#        echo "Le champs est vide"
+#    fi
+#}
+
+delete_user() {
     echo "Vous allez supprimer un utilisateur :"
-    read -p "Quel est le nom de l'utilisateur ?:" name_user
+    read -p "Quel est le nom de l'utilisateur ? : " name_user
+
     if [[ -n $name_user ]]; then
-        sudo userdel -r -f  $name_user
+        # Vérifie si l'utilisateur est actif
+        if pgrep -u "$name_user" > /dev/null; then
+            sudo pkill -u $name_user
+
+            sleep 2 
+
+            sudo userdel -r -f "$name_user"
+            if [[ $? -eq 0 ]]; then
+                echo "L'utilisateur $name_user a été supprimé avec succès."
+            else
+                echo "Erreur lors de la suppression de l'utilisateur $name_user."
+            fi
+        fi 
     else 
-        echo "Le champs est vide"
+        echo "Le champ est vide."
     fi
 }
 
@@ -53,6 +76,24 @@ update_group(){
     fi 
 }
 
+update_pswd(){
+    read -p "Quel est le nom de l'utilisateur dont vous souhaitez changer le mot de passe ?:" user_name
+
+    random_pswd=$(openssl rand -base64 10)
+
+    if [[ -n $user_name ]]; then 
+        echo "$user_name:$random_pswd" | sudo chpasswd
+        if [[ $? -eq 0 ]]; then
+            sudo chage -M 2 $user_name
+            echo "Le mot de passe pour $user_name est : $random_pswd"
+        else 
+            echo "Erreur : le mot de passe de $user_name n'a pas pue être modifier"
+        fi
+    else 
+        echo "Le champs est vide"
+    fi
+}
+
 secondary_group(){
     read -p "Quel est le nom de l'user ?: " name_user
     read -p "Quel est le nom du groupe ?: " group_user 
@@ -63,64 +104,6 @@ secondary_group(){
     fi 
 }
 
-menu_update_group(){
-    while true; do
-    echo "Que vous voulez vous ?: "
-    echo "1. Changer le groupe principal"
-    echo "2. Ajouter ou changer un groupe supplémentaire"
-    echo "3. Retour"
-    read -p "Choisissez une option :" user_input2
-    clear
-        case $user_input2 in 
-
-            1)update_group 
-            ;;
-
-            2)secondary_group 
-            ;;
-
-            3)break
-            ;;
-
-            *)echo "Choix invalide"
-            ;;
-            esac
-    done
-}
-
-update_user(){
-    while true; do
-    clear
-    echo "Que vous voulez vous modifier ?"
-    echo "1. Le nom de l'utilisateur ?"
-    echo "2. Le groupe de l'utilisateur ?"
-    echo "3. Le répertoire ?"
-    echo "4. Le mot de passe ?"
-    echo "5. Retour"
-    read -p "Choisissez une option" user_input3
-    clear
-        case $user_input3 in
-
-            1)update_name
-            ;;
-
-            2)menu_update_group
-            ;;
-
-            3)..
-            ;;
-
-            4)fonction
-            ;;
-
-            5)break
-            ;;
-
-            *)echo "Choix invalide"
-            ;;
-        esac
-    done
-}
 
 see_user(){
     echo "Voici la liste de tous les utilisateur :"
@@ -167,8 +150,8 @@ see_group(){
 }
 
 set_acl_read(){  
-    read -p "Sur quel groupe voulez vous accorder ou supprimer des permissions ?:" acl_group
-    read -p "Surl que dossier ou fichier ?:" fichier_doss
+    read -p "Sur quel groupe voulez vous accorder des permissions ?:" acl_group
+    read -p "Sur quel repertoire ou fichier ?:" fichier_doss
 
     if [[ -n $acl_group && -n $fichier_doss ]]; then
         echo "Les permissions on bien été mis à jours"
@@ -178,14 +161,97 @@ set_acl_read(){
     fi
 }
 
-set_default_acl(){
-    ..
+set_acl_write(){  
+    read -p "Sur quel groupe voulez vous accorder des permissions ?:" acl_group
+    read -p "Sur quel repertoire ou fichier ?:" fichier_doss
+
+    if [[ -n $acl_group && -n $fichier_doss ]]; then
+        echo "Les permissions on bien été mis à jours"
+        setfacl -m g:$acl_group:w $fichier_doss
+    else 
+        echo "Le champs est vide"
+    fi
 }
+
+set_acl_excute(){  
+    read -p "Sur quel groupe voulez vous accorder des permissions ?:" acl_group
+    read -p "Sur quel repertoire ou fichier ?:" fichier_doss
+
+    if [[ -n $acl_group && -n $fichier_doss ]]; then
+        echo "Les permissions on bien été mis à jours"
+        setfacl -m g:$acl_group:X $fichier_doss
+    else 
+        echo "Le champs est vide"
+    fi
+}
+
 
 get_acl(){
     read -p "Quel est le repertoire ou fichier dont vous voulez voir les permissions ?:" fichier_doss
-    if [[ -n ]]
-    getacl $fichier
+    if [[ -n $fichier_doss ]]; then
+        echo "Voici les permissions :"
+        getfacl -a $fichier_doss
+    else 
+        echo "le champs est vide"
+    fi
+}
+
+menu_update_group(){
+    while true; do
+    echo "Que vous voulez vous ?: "
+    echo "1. Changer le groupe principal"
+    echo "2. Ajouter ou changer un groupe supplémentaire"
+    echo "3. Retour"
+    read -p "Choisissez une option :" user_input2
+    clear
+        case $user_input2 in 
+
+            1)update_group 
+            ;;
+
+            2)secondary_group 
+            ;;
+
+            3)break
+            ;;
+
+            *)echo "Choix invalide"
+            ;;
+            esac
+    done
+}
+
+update_user(){
+    while true; do
+    echo "Que vous voulez vous modifier ?"
+    echo "1. Le nom de l'utilisateur ?"
+    echo "2. Le groupe de l'utilisateur ?"
+    echo "3. Le répertoire ?"
+    echo "4. Le mot de passe ?"
+    echo "5. Retour"
+    read -p "Choisissez une option" user_input3
+    clear
+        case $user_input3 in
+
+            1)update_name
+            ;;
+
+            2)menu_update_group
+            ;;
+
+            3)..
+            ;;
+
+            4)update_pswd
+            ;;
+
+            5)break
+            ;;
+
+            *)echo "Choix invalide"
+            ;;
+        esac
+    done
 }
 
 sous_menu_permission(){
@@ -203,10 +269,10 @@ sous_menu_permission(){
             1)set_acl_read
             ;;
 
-            2)...
+            2)set_acl_write
             ;;
 
-            3)...
+            3)set_acl_excute
             ;;
 
             4)break
