@@ -166,8 +166,16 @@ see_group(){
     getent group
 }
 
-set_acl(){
-    ..
+set_acl_read(){  
+    read -p "Sur quel groupe voulez vous accorder ou supprimer des permissions ?:" acl_group
+    read -p "Surl que dossier ou fichier ?:" fichier_doss
+
+    if [[ -n $acl_group && -n $fichier_doss ]]; then
+        echo "Les permissions on bien été mis à jours"
+        setfacl -m g:$acl_group:r $fichier_doss
+    else 
+        echo "Le champs est vide"
+    fi
 }
 
 set_default_acl(){
@@ -175,13 +183,47 @@ set_default_acl(){
 }
 
 get_acl(){
-    ..
+    read -p "Quel est le repertoire ou fichier dont vous voulez voir les permissions ?:" fichier_doss
+    if [[ -n ]]
+    getacl $fichier
+}
+
+sous_menu_permission(){
+    while true; do 
+        echo "Quel sont les permission que vous voulez ajouter ?"
+        echo "1. lire"
+        echo "2. écrire"
+        echo "3. executer"
+        echo "4. retour"
+        read -p "Choisisez une option" choice_sous_menu
+        clear
+
+        case $choice_sous_menu in
+
+            1)set_acl_read
+            ;;
+
+            2)...
+            ;;
+
+            3)...
+            ;;
+
+            4)break
+            ;;
+
+            *) echo "Choix invalide"
+            ;;
+        esac
+    done
+
+
 }
 
 menu_permission(){
     while true; do
         echo "1. Attribuer des permission sur un groupe"
-        echo "2. Appliquer des permission par défault sur un répertoire ou fichier"
+        # echo "2. Appliquer des permission par défault sur un répertoire ou fichier"
         echo "3. Voir les permission d'un répertoire"
         echo "4. Retour" 
         read -p "Choisissez une option:" choice_menu_acl
@@ -189,7 +231,7 @@ menu_permission(){
 
         case $choice_menu_acl in
 
-        1) set_acl
+        1) sous_menu_permission
         ;;
 
         2) set_default_acl
@@ -297,7 +339,7 @@ while true; do
         2)menu_group
         ;;
 
-        3)fonction
+        3)menu_permission
         ;;
 
         4)fonction
