@@ -93,6 +93,7 @@ see_user_group(){
         groups $name_user
     else 
         echo "Le champs est vide"
+    fi
 }
 
 
@@ -148,6 +149,29 @@ set_default_read(){
         echo "Les permissions de lecture on bien été ajouter au groupe $group_name sur le fichier ou repertoire $fichier_doss"
     else 
         echo "Le champs est vide"
+    fi
+}
+
+set_default_write(){
+    read -p "Quel est le repertoire ou fichier dont vous voulez attribuer les permissions par défault ?" fichier_doss
+    read -p "Sur quel groupe ?" $group_name
+    if [[ -n $fichier_doss ]]; then 
+        sudo setfacl -m d:g:$group_name:w $fichier_doss
+        echo "Les permissions de lecture on bien été ajouter au groupe $group_name sur le fichier ou repertoire $fichier_doss"
+    else 
+        echo "Le champs est vide"
+    fi
+}
+
+set_default_execute(){
+    read -p "Quel est le repertoire ou fichier dont vous voulez attribuer les permissions par défault ?" fichier_doss
+    read -p "Sur quel groupe ?" $group_name
+    if [[ -n $fichier_doss ]]; then 
+        sudo setfacl -m d:g:$group_name:x $fichier_doss
+        echo "Les permissions de lecture on bien été ajouter au groupe $group_name sur le fichier ou repertoire $fichier_doss"
+    else 
+        echo "Le champs est vide"
+    fi
 }
 
 set_default_acl(){
