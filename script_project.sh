@@ -13,6 +13,7 @@ Add_user(){
     read -p "Dans quel groupe appartiendra t'il?:" group_user
     if [[ -n $name_user ]]; then
         sudo useradd -m $name_user
+        echo "L'utilisateur $name_user à bien été ajouté"
     if [[ -n $group_user && -n $name_user ]]; then
         sudo useradd -g $group_user -m $name_user
     fi
@@ -21,38 +22,18 @@ Add_user(){
     fi
 }
 
-#delete_user(){
-#    echo "Vous allez supprimer un utilisateur :"
-#    read -p "Quel est le nom de l'utilisateur ?:" name_user
-#    if [[ -n $name_user ]]; then
-#        sudo userdel -r -f  $name_user
-#    else 
-#        echo "Le champs est vide"
-#    fi
-#}
-
-delete_user() {
+delete_user(){
     echo "Vous allez supprimer un utilisateur :"
-    read -p "Quel est le nom de l'utilisateur ? : " name_user
-
+    read -p "Quel est le nom de l'utilisateur ?:" name_user
     if [[ -n $name_user ]]; then
-        # Vérifie si l'utilisateur est actif
-        if pgrep -u "$name_user" > /dev/null; then
-            sudo pkill -u $name_user
-
-            sleep 2 
-
-            sudo userdel -r -f "$name_user"
-            if [[ $? -eq 0 ]]; then
-                echo "L'utilisateur $name_user a été supprimé avec succès."
-            else
-                echo "Erreur lors de la suppression de l'utilisateur $name_user."
-            fi
-        fi 
+        sudo userdel -r -f  $name_user
+        echo "L'utilisateur $name_user a été supprimé avec succès."
     else 
-        echo "Le champ est vide."
+        echo "Le champs est vide"
     fi
 }
+
+
 
 update_name(){
     echo "Vous allez changer le nom d'un user"
@@ -71,6 +52,7 @@ update_group(){
     read -p "Quel est le nom du groupe ?: " group_user 
     if [[ -n name_user && -n $group_user ]]; then 
         sudo usermod -g $group_user $name_user
+        echo "L'utilisateur $name_user à bien été ajouter dans le group $group_user"
     else 
         echo "Le champs est vide"
     fi 
@@ -113,8 +95,8 @@ see_user(){
 add_group(){
     read -p "Quel est le nom de ce nouveau groupe ?:" groupe_name
     if [[ -n $groupe_name ]]; then 
-        echo "Le groupe $groupe_name à été ajouté"
         sudo groupadd $groupe_name
+        echo "Le groupe $groupe_name à été ajouté"
     else 
         echo "Le champs est vide"
     fi
