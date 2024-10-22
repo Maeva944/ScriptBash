@@ -11,12 +11,14 @@ Add_user(){
     echo "Vous allez crée un utilisateur :"
     read -p "Quel est le nom de l'utilisateur ?:" name_user
     read -p "Dans quel groupe appartiendra t'il?:" group_user
-    if [[ -n $name_user ]]; then
+    if [[ -n $name_user && -z $group_user ]]; then
         sudo useradd -m $name_user
         echo "L'utilisateur $name_user à bien été ajouté"
-    if [[ -n $group_user && -n $name_user ]]; then
-        sudo useradd -g $group_user -m $name_user
-    fi
+    elif [[ -n $group_user && -n $name_user ]]; then
+        echo "Lutilisateur $name_user à bien été ajouté au groupe $group_user"    
+        if [[ $? -eq 1 ]]; then 
+            echo "Erreur : L'utilisateur $name_user n'a pas été ajouter dans le groupe $group_user"
+        fi
     else 
         echo "Le champs est vide"
     fi
@@ -32,8 +34,6 @@ delete_user(){
         echo "Le champs est vide"
     fi
 }
-
-
 
 update_name(){
     echo "Vous allez changer le nom d'un user"
@@ -86,6 +86,15 @@ secondary_group(){
     fi 
 }
 
+see_user_group(){
+    read -p "Quel est le nom de l'utilisateur ?" name_user
+    if [[ -n $name_user ]]; then
+        echo "Voici les groupes dont $name_user en fait partis"
+        groups $name_user
+    else 
+        echo "Le champs est vide"
+}
+
 
 see_user(){
     echo "Voici la liste de tous les utilisateur :"
@@ -129,6 +138,48 @@ delete_empty_group() {
 see_group(){
     echo "Voici la liste de tous les groupes :"
     getent group
+}
+
+set_default_read(){
+    read -p "Quel est le repertoire ou fichier dont vous voulez attribuer les permissions par défault ?" fichier_doss
+    read -p "Sur quel groupe ?" $group_name
+    if [[ -n $fichier_doss ]]; then 
+        sudo setfacl -m d:g:$group_name:r $fichier_doss
+        echo "Les permissions de lecture on bien été ajouter au groupe $group_name sur le fichier ou repertoire $fichier_doss"
+    else 
+        echo "Le champs est vide"
+}
+
+set_default_acl(){
+    while true; do
+    echo "Quel sont les permissions que vous voulez ajouter ?:"
+    echo "1. Lire"
+    echo "2. Écrire"
+    echo "3. Execute"
+    echo "4. Retour"
+    read -p "Choisissez une option :" user_choice
+
+    case $user_choice in
+
+        1)set_default_read
+        ;;
+
+        2)set_default_write
+        ;;
+
+        3)set_default_execute
+        ;;
+
+        4)break
+        ;;
+
+        *)
+        echo "Choix invalide"
+        ;;
+    
+    esac 
+
+done 
 }
 
 set_acl_read(){  
@@ -271,7 +322,7 @@ sous_menu_permission(){
 menu_permission(){
     while true; do
         echo "1. Attribuer des permission sur un groupe"
-        # echo "2. Appliquer des permission par défault sur un répertoire ou fichier"
+        echo "2. Appliquer des permission par défault sur un répertoire ou fichier"
         echo "3. Voir les permission d'un répertoire"
         echo "4. Retour" 
         read -p "Choisissez une option:" choice_menu_acl
@@ -339,7 +390,8 @@ menu_user(){
         echo "2. Supprimé un utilisateur"
         echo "3. Modifier un utilisateur"
         echo "4. Voir tous les utilisateurs"
-        echo "5. Retour"
+        echo "5. Voir tous les groupe d'un Utilisateur"
+        echo "6. Retour"
         read -p "Choisissez une option:" choice_menu_user
         clear
 
@@ -357,7 +409,10 @@ menu_user(){
         4)see_user
         ;;
 
-        5)break
+        5)see_user_group
+        ;;
+
+        6)break
         ;;
 
         *)echo "Choix invalide"
