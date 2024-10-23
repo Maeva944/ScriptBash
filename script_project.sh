@@ -2,19 +2,22 @@
 
 #faire un menu pour chaque fonctionalité 
 #les fonctionalités à ajouter : 
-#ajouter et modifier un utilisateur 
+#ajouter et modifier un utilisateur : fait
 #supprésion et gestion des utilisateur inactifs
 #gestion des groupe 
-#gestion des permission avec acl
+#gestion des permission avec acl :
 
 Add_user(){
     echo "Vous allez crée un utilisateur :"
     read -p "Quel est le nom de l'utilisateur ?:" name_user
     read -p "Dans quel groupe appartiendra t'il?:" group_user
     if [[ -n $name_user && -z $group_user ]]; then
-        sudo useradd -m $name_user
+        sudo useradd $name_user
+        echo "Configurer mon mot de passe"
+        update_pswd
         echo "L'utilisateur $name_user à bien été ajouté"
     elif [[ -n $group_user && -n $name_user ]]; then
+        sudo useradd -m $name_user
         echo "Lutilisateur $name_user à bien été ajouté au groupe $group_user"    
         if [[ $? -eq 1 ]]; then 
             echo "Erreur : L'utilisateur $name_user n'a pas été ajouter dans le groupe $group_user"
@@ -247,7 +250,7 @@ get_acl(){
     read -p "Quel est le repertoire ou fichier dont vous voulez voir les permissions ?:" fichier_doss
     if [[ -n $fichier_doss ]]; then
         echo "Voici les permissions :"
-        getfacl -a $fichier_doss
+        getfacl $fichier_doss
     else 
         echo "le champs est vide"
     fi
@@ -447,13 +450,51 @@ menu_user(){
 
 }
 
+user_inactive(){
+    user=/etc/passwd;
+
+    
+}
+
+
+
+menu_user_inactif(){
+    while true; do
+    echo "Vous êtes sur le menu des utilisateur inactif"
+    echo "1. Voir les utilisateur inactif depuis 2min"
+    echo "2. Supprimer un utilisateur inactif"
+    echo "3. Vérouiller un utilisateur inactif"
+    recho "4. Retour"
+    read -p "Choisissez une option :" choice_user
+
+    case $choice_user in 
+        
+        1)...
+        ;;
+
+        2)...
+        ;;
+
+        3)...
+        ;;
+
+        4)break
+        ;;
+
+        *)
+        echo "Choix invalide"
+        ;;
+    esac
+
+done
+}
 
 while true; do
     echo "Bonjour"
     echo "1. Ajouter, modifier ou supprimer un utilisateur"
     echo "2. Gestion des groupes"
     echo "3. Attribuer des permissions"
-    echo "4. Voir les utilisateur inactif"
+    echo "4. Gestion utilisateur inactif"
     echo "5. Sortis"
     read -p "Choisissez une options :" user_input
     clear
@@ -469,7 +510,7 @@ while true; do
         3)menu_permission
         ;;
 
-        4)fonction
+        4)menu_user_inactif
         ;;
 
         5)break
@@ -480,3 +521,34 @@ while true; do
 
     esac
 done
+
+for utilisateur in $(lastlog | awk '{if (NR>1 && $4=="Never") print $1}'); do
+
+    # Alerte pour chaque utilisateur inactif
+    echo "ALERTE : L'utilisateur $utilisateur ne s'est jamais connecté."
+
+    # Demander à l'administrateur s'il veut verrouiller ou supprimer le compte
+    read -p "Voulez-vous verrouiller (v) ou supprimer (s) le compte de $utilisateur ? " choix
+
+    # Si l'administrateur choisit de verrouiller le compte
+    if [[ $choix == "v" ]]; then
+        passwd -l $utilisateur
+        echo "Le compte de l'utilisateur $utilisateur a été verrouillé."
+
+    # Si l'administrateur choisit de supprimer le compte
+    elif [[ $choix == "s" ]]; then
+        # Sauvegarde du répertoire personnel de l'utilisateur avant suppression
+        tar -zcvf /backup/${utilisateur}_home_backup.tar.gz /home/$utilisateur
+        echo "Le répertoire personnel de $utilisateur a été sauvegardé dans /backup."
+
+        # Suppression du compte utilisateur avec le répertoire personnel
+        userdel -r $utilisateur
+        echo "Le compte de l'utilisateur $utilisateur a été supprimé."
+
+    else
+        echo "Option non reconnue, aucune action prise pour $utilisateur."
+    fi
+
+done
+
+
