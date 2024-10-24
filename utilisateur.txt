@@ -1,0 +1,3 @@
+alice users /bin/bash /home/alice
+bob developers /bin/zsh /home/bob
+lucie admins /bin/bash /home/charlie

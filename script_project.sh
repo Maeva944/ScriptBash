@@ -2,10 +2,7 @@
 
 #faire un menu pour chaque fonctionalité 
 #les fonctionalités à ajouter : 
-#ajouter et modifier un utilisateur : fait
-#supprésion et gestion des utilisateur inactifs
-#gestion des groupe 
-#gestion des permission avec acl :
+
 
 Add_user(){
     echo "Vous allez crée un utilisateur :"
@@ -281,14 +278,28 @@ menu_update_group(){
     done
 }
 
+update_shell() {
+    read -p "Quel est le nom de l'user ? :" name_user
+    read -p "Le nouveau shell ? :" new_shell
+
+    # Vérifie si l'utilisateur existe
+    if id "$name_user" &>/dev/null; then
+        sudo usermod -s "$new_shell" "$name_user"
+        echo "Le shell de l'utilisateur $name_user a été modifié en $new_shell."
+    else
+        echo "L'utilisateur $name_user n'existe pas."
+    fi
+}
+
 update_user(){
     while true; do
     echo "Que vous voulez vous modifier ?"
     echo "1. Le nom de l'utilisateur ?"
     echo "2. Le groupe de l'utilisateur ?"
     echo "3. Le répertoire ?"
-    echo "4. Le mot de passe ?"
-    echo "5. Retour"
+    echo "4. Le shell ?"
+    echo "5. Le mot de passe ?"
+    echo "6. Retour"
     read -p "Choisissez une option" user_input3
     clear
         case $user_input3 in
@@ -301,11 +312,14 @@ update_user(){
 
             3)..
             ;;
-
-            4)update_pswd
+            
+            4)update_shell
             ;;
 
-            5)break
+            5)update_pswd
+            ;;
+
+            6)break
             ;;
 
             *)echo "Choix invalide"
@@ -522,33 +536,7 @@ while true; do
     esac
 done
 
-for utilisateur in $(lastlog | awk '{if (NR>1 && $4=="Never") print $1}'); do
 
-    # Alerte pour chaque utilisateur inactif
-    echo "ALERTE : L'utilisateur $utilisateur ne s'est jamais connecté."
 
-    # Demander à l'administrateur s'il veut verrouiller ou supprimer le compte
-    read -p "Voulez-vous verrouiller (v) ou supprimer (s) le compte de $utilisateur ? " choix
-
-    # Si l'administrateur choisit de verrouiller le compte
-    if [[ $choix == "v" ]]; then
-        passwd -l $utilisateur
-        echo "Le compte de l'utilisateur $utilisateur a été verrouillé."
-
-    # Si l'administrateur choisit de supprimer le compte
-    elif [[ $choix == "s" ]]; then
-        # Sauvegarde du répertoire personnel de l'utilisateur avant suppression
-        tar -zcvf /backup/${utilisateur}_home_backup.tar.gz /home/$utilisateur
-        echo "Le répertoire personnel de $utilisateur a été sauvegardé dans /backup."
-
-        # Suppression du compte utilisateur avec le répertoire personnel
-        userdel -r $utilisateur
-        echo "Le compte de l'utilisateur $utilisateur a été supprimé."
-
-    else
-        echo "Option non reconnue, aucune action prise pour $utilisateur."
-    fi
-
-done
 
 
