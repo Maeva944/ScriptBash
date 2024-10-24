@@ -47,16 +47,22 @@ update_name(){
 }
 
 
-update_group(){
-    read -p "Quel est le nom de l'user ?: " name_user
-    read -p "Quel est le nom du groupe ?: " group_user 
-    if [[ -n name_user && -n $group_user ]]; then 
-        sudo usermod -g $group_user $name_user
-        echo "L'utilisateur $name_user à bien été ajouter dans le group $group_user"
+update_group() {
+    read -p "Quel est le nom de l'utilisateur ? : " name_user
+    read -p "Quel est le nom du groupe ? : " group_user
+
+    if [[ -n $name_user && -n $group_user ]]; then 
+        if id "$name_user" &>/dev/null && getent group "$group_user" >/dev/null; then
+            sudo usermod -g "$group_user" "$name_user"
+            echo "L'utilisateur $name_user a bien été ajouté au groupe $group_user."
+        else
+            echo "L'utilisateur ou le groupe n'existe pas."
+        fi
     else 
-        echo "Le champs est vide"
-    fi 
+        echo "Les champs ne doivent pas être vides."
+    fi
 }
+
 
 update_pswd(){
     read -p "Quel est le nom de l'utilisateur dont vous souhaitez changer le mot de passe ?:" user_name
@@ -97,20 +103,27 @@ see_user_group(){
 }
 
 
+
 see_user(){
     echo "Voici la liste de tous les utilisateur :"
     cat /etc/passwd
 }
 
-add_group(){
-    read -p "Quel est le nom de ce nouveau groupe ?:" groupe_name
-    if [[ -n $groupe_name ]]; then 
-        sudo groupadd $groupe_name
-        echo "Le groupe $groupe_name à été ajouté"
-    else 
-        echo "Le champs est vide"
+add_group() {
+    read -p "Quel est le nom de ce nouveau groupe ? : " groupe_name
+
+    if [[ -n $groupe_name ]]; then
+        if getent group "$groupe_name" >/dev/null; then
+            echo "Le groupe $groupe_name existe déjà."
+        else
+            sudo groupadd "$groupe_name"
+            echo "Le groupe $groupe_name a été ajouté."
+        fi
+    else
+        echo "Le champ est vide."
     fi
 }
+
 
 remove_user_from_group(){
     echo "Vous allez retirer un user d'un groupe"
@@ -463,13 +476,6 @@ menu_user(){
     done
 
 }
-
-user_inactive(){
-    user=/etc/passwd;
-
-    
-}
-
 
 
 menu_user_inactif(){

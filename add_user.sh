@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Fonction pour générer un mot de passe aléatoire
-generer_mot_de_passe() {
+new_pswd() {
     echo $(openssl rand -base64 10)
 }
 
 # Fonction pour ajouter un nouvel utilisateur
-ajouter_utilisateur() {
+Add_user() {
     local nom_utilisateur="$1"
     local groupe="$2"
     local shell="$3"
@@ -17,7 +17,7 @@ ajouter_utilisateur() {
 
     useradd -m -d "$repertoire" -s "$shell" -g "$groupe" "$nom_utilisateur"
 
-    mot_de_passe=$(generer_mot_de_passe)
+    mot_de_passe=$(new_pswd)
     echo "$nom_utilisateur:$mot_de_passe" | chpasswd
 
     # Expiration mdp
